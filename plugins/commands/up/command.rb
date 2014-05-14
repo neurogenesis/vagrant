@@ -47,6 +47,22 @@ module VagrantPlugins
         argv = parse_options(opts)
         return if !argv
 
+        # Check for default provider file
+        provider_file = 'VagrantProvider'
+        if File.exists?(provider_file)
+          File.open(provider_file, 'r') do |f|
+            @logger.debug("Reading provider from '#{provider_file}'")
+            provider = f.readline.chomp
+            @logger.debug("Provider = '#{provider}'")
+            puts "#{provider_file} file exists, using '#{provider}' as the provider"
+            if options[:provider] && (options[:provider].to_s != provider.to_s)
+              provider_old = options[:provider].to_s
+              puts "WARNING: provider '#{provider_old}' already specified, using '#{provider}' instead"
+            end
+            options[:provider] = provider
+          end
+        end
+
         # Validate the provisioners
         validate_provisioner_flags!(options)
 
